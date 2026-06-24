@@ -187,6 +187,8 @@ function goTo(screen, opts = {}) {
     if (typeof initExplore === 'function' && !explore.wotd) initExplore();
     else if (typeof renderWotd === 'function') renderWotd();
   }
+
+  if (screen === 'challenge') {
     const banner = document.getElementById('challenge-paused-banner');
     if (opts.pausing || state.fromChallenge) {
       banner.classList.add('visible');
