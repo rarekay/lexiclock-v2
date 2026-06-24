@@ -1,0 +1,18 @@
+{
+  "name": "LexiClock",
+  "short_name": "LexiClock",
+  "description": "Scrabble timer, word challenger and player toolkit. Free, offline, works on any device.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1C1C2E",
+  "theme_color": "#1C1C2E",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

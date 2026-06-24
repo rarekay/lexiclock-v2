@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="LexiClock"/>
+  <meta name="theme-color" content="#1C1C2E"/>
+  <meta name="description" content="Scrabble timer and word challenger for all players. Free, offline, installable on any device."/>
+  <title>LexiClock</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icons/icon.svg"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-EHTTN7BPX0"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-EHTTN7BPX0');
+  </script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Onboarding ── -->
+  <div id="onboarding" class="onboarding">
+    <div class="ob-cards">
+      <div class="ob-card active">
+        <i class="ti ti-clock ob-icon" aria-hidden="true"></i>
+        <h2 class="ob-title">Welcome to LexiClock</h2>
+        <p class="ob-body">The Scrabble timer players have always needed. Free, offline, and built for the game.</p>
+      </div>
+      <div class="ob-card">
+        <i class="ti ti-hand-finger ob-icon" aria-hidden="true"></i>
+        <h2 class="ob-title">Tap to pass the clock</h2>
+        <p class="ob-body">When your turn is done, tap your tile to pass the clock. The first player taps to start the game.</p>
+      </div>
+      <div class="ob-card">
+        <i class="ti ti-alert-triangle ob-icon" aria-hidden="true"></i>
+        <h2 class="ob-title">Challenge any word</h2>
+        <p class="ob-body">Hit Challenge to pause the clock and check any word — or multiple words at once — against Collins or NWL2023. One clear verdict, no arguments.</p>
+      </div>
+    </div>
+    <div class="ob-dots">
+      <div class="ob-dot active"></div>
+      <div class="ob-dot"></div>
+      <div class="ob-dot"></div>
+    </div>
+    <div class="ob-actions">
+      <button class="ob-skip" id="ob-skip">Skip</button>
+      <button class="ob-next" id="ob-next">Next</button>
+    </div>
+  </div>
+
+  <!-- ── Reset Modal ── -->
+  <div class="modal-overlay" id="reset-modal">
+    <div class="modal">
+      <div class="modal-title">Game over?</div>
+      <div class="modal-body">Play again with the same settings, or start fresh.</div>
+      <button class="modal-btn primary" onclick="playAgain()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Play again
+      </button>
+      <button class="modal-btn secondary" onclick="newGame()">
+        <i class="ti ti-layout-grid" aria-hidden="true"></i> New game
+      </button>
+      <button class="modal-btn ghost" onclick="closeResetModal()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ── Setup Screen ── -->
+  <div class="screen active" id="screen-setup">
+    <div class="lc-header">
+      <div class="lc-logo">Lexi<span>Clock</span></div>
+      <div class="lc-header-tag">2 players</div>
+    </div>
+    <div class="screen-body">
+      <div class="sec-label mt8">Player names (optional)</div>
+      <div class="name-row">
+        <div class="name-field">
+          <input class="name-input" type="text" placeholder="Player 1" maxlength="12" autocomplete="off"/>
+        </div>
+        <div class="name-field">
+          <input class="name-input" type="text" placeholder="Player 2" maxlength="12" autocomplete="off"/>
+        </div>
+      </div>
+
+      <div class="sec-label" id="time-label">Time per turn</div>
+      <div class="mode-card selected" id="mode-turn" onclick="selectMode('turn')">
+        <div class="mode-icon"><i class="ti ti-rotate-clockwise" aria-hidden="true"></i></div>
+        <div class="mode-title">Per turn</div>
+        <div class="mode-desc">Fixed time per move. Clock resets every turn.</div>
+      </div>
+      <div class="mode-card" id="mode-total" onclick="selectMode('total')">
+        <div class="mode-icon"><i class="ti ti-hourglass" aria-hidden="true"></i></div>
+        <div class="mode-title">Total time</div>
+        <div class="mode-desc">Each player has a time budget for the whole game.</div>
+      </div>
+
+      <div class="sec-label mt16">Duration</div>
+      <div class="time-row" id="turn-times">
+        <button class="time-btn selected" onclick="selectTime(this, 60)">1:00</button>
+        <button class="time-btn" onclick="selectTime(this, 90)">1:30</button>
+        <button class="time-btn" onclick="selectTime(this, 120)">2:00</button>
+        <button class="time-btn" onclick="selectTime(this, 180)">3:00</button>
+      </div>
+      <div class="time-row hidden" id="total-presets">
+        <button class="time-btn" onclick="selectTime(this, 900)">15:00</button>
+        <button class="time-btn selected" onclick="selectTime(this, 1200)">20:00</button>
+        <button class="time-btn" onclick="selectTime(this, 1500)">25:00</button>
+      </div>
+
+      <div class="custom-time-wrap" id="custom-time-wrap">
+        <div class="custom-time-field">
+          <label>Player 1 custom time</label>
+          <input type="text" id="custom-p1" placeholder="e.g. 18:00" autocomplete="off"/>
+        </div>
+        <div class="custom-time-field">
+          <label>Player 2 custom time</label>
+          <input type="text" id="custom-p2" placeholder="e.g. 18:00" autocomplete="off"/>
+        </div>
+      </div>
+
+      <button class="start-btn" onclick="startGame()">
+        <i class="ti ti-player-play" aria-hidden="true"></i> Start game
+      </button>
+
+      <div class="donation-nudge" id="donation-nudge">
+        <div class="nudge-text"><span>Enjoying LexiClock?</span></div>
+        <div class="nudge-actions">
+          <button class="nudge-btn" onclick="window.open('https://tally.so/r/GxkP5e','_blank'); gtag('event','feedback_tapped');">⭐ Rate it</button>
+          <button class="nudge-btn amber" onclick="window.open('https://ko-fi.com/kennethoshunkeye','_blank'); gtag('event','kofi_tapped');">☕ Support us</button>
+        </div>
+        <button class="nudge-close" onclick="document.getElementById('donation-nudge').classList.remove('visible')" aria-label="Dismiss">×</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Timer Screen ── -->
+  <div class="screen" id="screen-timer">
+    <div class="lc-header">
+      <div class="lc-logo">Lexi<span>Clock</span></div>
+      <div class="lc-header-tag" id="timer-mode-tag">per turn</div>
+    </div>
+    <div class="challenge-banner" id="challenge-banner">
+      <i class="ti ti-clock-pause" aria-hidden="true"></i>
+      Clock paused during challenge
+    </div>
+
+    <!-- Empty state — shown when no game is active -->
+    <div class="timer-empty" id="timer-empty">
+      <i class="ti ti-clock-off" aria-hidden="true"></i>
+      <div class="timer-empty-title">No game in progress</div>
+      <div class="timer-empty-body">Set up a new game to get started</div>
+      <button class="timer-empty-btn" onclick="goTo('setup')">
+        <i class="ti ti-layout-grid" aria-hidden="true"></i> Set up a game
+      </button>
+    </div>
+
+    <div class="timer-body" id="timer-body">
+      <div class="player-tile inactive flipped" id="tile-p1" onclick="switchTurn(0)">
+        <div class="p-name" id="display-name-p1">PLAYER 1</div>
+        <div class="p-time" id="time-p1">1:00</div>
+        <div class="p-status" id="status-p1">Ready</div>
+        <div class="p-tap-hint" id="hint-p1"></div>
+        <div class="timesup-badge" id="p1-timesup">TIME'S UP</div>
+      </div>
+      <div class="player-tile inactive" id="tile-p2" onclick="switchTurn(1)">
+        <div class="p-name" id="display-name-p2">PLAYER 2</div>
+        <div class="p-time" id="time-p2">1:00</div>
+        <div class="p-status" id="status-p2">Ready</div>
+        <div class="p-tap-hint" id="hint-p2"></div>
+        <div class="timesup-badge" id="p2-timesup">TIME'S UP</div>
+      </div>
+    </div>
+    <div class="timer-controls" id="timer-controls">
+      <button class="ctrl-btn" onclick="togglePause()">
+        <i id="pause-icon" class="ti ti-player-pause" aria-hidden="true"></i>
+        <span id="pause-label">Pause</span>
+      </button>
+      <button class="ctrl-btn challenge" onclick="triggerChallenge()">
+        <i class="ti ti-alert-triangle" aria-hidden="true"></i> Challenge
+      </button>
+      <button class="ctrl-btn danger" onclick="resetGame()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Challenge Screen ── -->
+  <div class="screen" id="screen-challenge">
+    <div class="lc-header">
+      <div class="lc-logo">Lexi<span>Clock</span></div>
+      <div class="lc-header-tag" id="challenge-header-sub">word challenge</div>
+    </div>
+    <div class="challenge-banner" id="challenge-paused-banner">
+      <i class="ti ti-clock-pause" aria-hidden="true"></i>
+      Clock paused — checking words
+    </div>
+    <div class="word-body">
+      <div class="sec-label">Dictionary</div>
+      <div class="dict-row">
+        <button class="dict-btn selected" id="dict-csw" onclick="selectDict('csw')">Collins (CSW)</button>
+        <button class="dict-btn" id="dict-nwl" onclick="selectDict('nwl')">NWL2023</button>
+      </div>
+      <div class="sec-label">Words to challenge</div>
+      <input type="text" class="word-input" id="word-input" placeholder="e.g. QI, ZAX, FROE" autocomplete="off" autocorrect="off" spellcheck="false"/>
+      <div class="word-hint">Separate multiple words with a comma or space. Letters only.</div>
+      <button class="check-btn" id="check-btn" onclick="checkWords()">
+        <i class="ti ti-check" aria-hidden="true"></i> Check words
+      </button>
+      <div class="loading-dots" id="loading-dots">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+    </div>
+
+    <!-- Verdict overlay -->
+    <div class="verdict-screen" id="verdict-screen">
+      <i class="verdict-icon ti ti-circle-check" id="verdict-icon" aria-hidden="true"></i>
+      <div class="verdict-line1" id="verdict-line1">Yes, the play is</div>
+      <div class="verdict-main" id="verdict-main">VALID</div>
+      <div class="verdict-words" id="verdict-words"></div>
+      <div class="verdict-dict" id="verdict-dict"></div>
+      <div class="verdict-invalid-list" id="verdict-invalid-list" style="display:none"></div>
+      <button class="verdict-back" onclick="closeVerdict()">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Explore Screen ── -->
+  <div class="screen" id="screen-explore">
+    <div class="lc-header">
+      <div class="lc-logo">Lexi<span>Clock</span></div>
+      <div class="lc-header-tag" id="explore-header-sub">explore</div>
+    </div>
+
+    <!-- Home section -->
+    <div class="explore-section" id="explore-home" style="display:flex; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+
+      <!-- Word of the Day -->
+      <div class="sec-label mt8">Word of the day</div>
+      <div class="wotd-card" onclick="toggleWotdDef()">
+        <div class="wotd-word" id="wotd-word">LOADING</div>
+        <div class="wotd-meta">
+          <span class="wotd-pts" id="wotd-pts">0 pts</span>
+          <span class="wotd-letters" id="wotd-letters"></span>
+        </div>
+        <div class="wotd-def" id="wotd-def" style="display:none"></div>
+        <div class="wotd-reveal" id="wotd-reveal-btn">▼ Tap to reveal definition</div>
+      </div>
+
+      <!-- Tools grid -->
+      <div class="sec-label mt16">Word tools</div>
+      <div class="explore-grid">
+        <div class="explore-card" onclick="showExploreSection('anagram')">
+          <i class="ti ti-letter-case" aria-hidden="true"></i>
+          <div class="explore-card-title">Anagrammer</div>
+          <div class="explore-card-desc">Find every word from your rack letters</div>
+        </div>
+        <div class="explore-card" onclick="showExploreSection('pattern')">
+          <i class="ti ti-regex" aria-hidden="true"></i>
+          <div class="explore-card-title">Pattern search</div>
+          <div class="explore-card-desc">Find words matching ??ING or QU??</div>
+        </div>
+        <div class="explore-card" onclick="showExploreSection('highvalue')">
+          <i class="ti ti-trophy" aria-hidden="true"></i>
+          <div class="explore-card-title">High-value words</div>
+          <div class="explore-card-desc">Q, Z, X, J words and Q without U</div>
+        </div>
+        <div class="explore-card" onclick="showExploreSection('vowelheavy')">
+          <i class="ti ti-a-b" aria-hidden="true"></i>
+          <div class="explore-card-title">Vowel-heavy words</div>
+          <div class="explore-card-desc">Clear your AAEEIOU rack</div>
+        </div>
+        <div class="explore-card" onclick="showExploreSection('tournament')">
+          <i class="ti ti-medal" aria-hidden="true"></i>
+          <div class="explore-card-title">Tournament essentials</div>
+          <div class="explore-card-desc">Must-know words for every player</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Anagrammer section -->
+    <div class="explore-section" id="explore-anagram" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+      <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="sec-label">Anagrammer</div>
+      <input type="text" id="anagram-input" class="word-input" placeholder="Enter letters e.g. AEINRST or use ? for blank" maxlength="7"/>
+      <div class="word-hint">Up to 7 letters. Use ? for a blank tile.</div>
+      <button class="check-btn" id="anagram-run" onclick="runAnagram()">Find words</button>
+      <div class="loading-dots" id="anagram-loading" style="display:none">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+      <div id="anagram-results"></div>
+    </div>
+
+    <!-- Pattern search section -->
+    <div class="explore-section" id="explore-pattern" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+      <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="sec-label">Pattern search</div>
+      <input type="text" id="pattern-input" class="word-input" placeholder="e.g. ??ING or QU?? or Z???" maxlength="15"/>
+      <div class="word-hint">Use ? as a wildcard for any letter.</div>
+      <button class="check-btn" id="pattern-run" onclick="runPattern()">Search</button>
+      <div class="loading-dots" id="pattern-loading" style="display:none">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+      <div id="pattern-results"></div>
+    </div>
+
+    <!-- High value words section -->
+    <div class="explore-section" id="explore-highvalue" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+      <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="sec-label">High-value words</div>
+      <div class="loading-dots" id="hv-loading" style="display:flex">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+      <div id="highvalue-content"></div>
+    </div>
+
+    <!-- Vowel heavy section -->
+    <div class="explore-section" id="explore-vowelheavy" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+      <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="sec-label">Vowel-heavy words</div>
+      <div class="loading-dots" id="vh-loading" style="display:flex">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+      <div id="vowelheavy-content"></div>
+    </div>
+
+    <!-- Tournament section -->
+    <div class="explore-section" id="explore-tournament" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
+      <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
+      <div class="sec-label">Tournament essentials</div>
+      <div class="loading-dots" id="t-loading" style="display:flex">
+        <div class="ldot"></div><div class="ldot"></div><div class="ldot"></div>
+      </div>
+      <div id="tournament-content"></div>
+    </div>
+
+  </div>
+
+  <!-- ── Settings Screen ── -->
+  <div class="screen" id="screen-settings">
+    <div class="lc-header">
+      <div class="lc-logo">Lexi<span>Clock</span></div>
+      <div class="lc-header-tag">settings</div>
+    </div>
+    <div class="settings-body">
+      <div class="sec-label">Preferences</div>
+      <div class="setting-group">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Sound</div>
+            <div class="setting-sub">Ticks, alerts, and end sounds</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-sound" checked/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Vibration</div>
+            <div class="setting-sub">Haptic feedback on turn switch</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-vibration" checked/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="sec-label">Support</div>
+      <div class="setting-group">
+        <div class="setting-link" onclick="window.open('https://tally.so/r/GxkP5e','_blank'); gtag('event','feedback_tapped');">
+          <div>
+            <div class="setting-link-label">Rate LexiClock ⭐</div>
+            <div class="setting-link-sub">Share your feedback — takes 1 minute</div>
+          </div>
+          <i class="ti ti-external-link setting-link-arrow" aria-hidden="true"></i>
+        </div>
+        <div class="setting-link" onclick="window.open('https://ko-fi.com/kennethoshunkeye','_blank'); gtag('event','kofi_tapped');">
+          <div>
+            <div class="setting-link-label">Support LexiClock ☕</div>
+            <div class="setting-link-sub">Buy us a coffee on Ko-fi</div>
+          </div>
+          <i class="ti ti-external-link setting-link-arrow" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="sec-label">About</div>
+      <div class="setting-group">
+        <div class="setting-row">
+          <div class="setting-label">LexiClock</div>
+          <div class="setting-sub" style="color: var(--muted);">v1.0.0</div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Dictionaries</div>
+            <div class="setting-sub">Collins CSW · NWL2023</div>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Platform</div>
+            <div class="setting-sub">Progressive Web App — works on any device, offline</div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-version">Made with love for Scrabble players everywhere</div>
+    </div>
+  </div>
+
+  <!-- ── Bottom Nav ── -->
+  <nav class="lc-nav" aria-label="Main navigation">
+    <button class="nav-btn active" id="nav-setup" onclick="goTo('setup')">
+      <i class="ti ti-layout-grid" aria-hidden="true"></i>
+      <span>Setup</span>
+    </button>
+    <button class="nav-btn" id="nav-timer" onclick="goTo('timer')">
+      <i class="ti ti-clock" aria-hidden="true"></i>
+      <span>Timer</span>
+    </button>
+    <button class="nav-btn challenge-nav" id="nav-challenge" onclick="goTo('challenge')">
+      <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+      <span>Challenge</span>
+    </button>
+    <button class="nav-btn explore-nav" id="nav-explore" onclick="goTo('explore')">
+      <i class="ti ti-compass" aria-hidden="true"></i>
+      <span>Explore</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="goTo('settings')">
+      <i class="ti ti-settings" aria-hidden="true"></i>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+</div>
+<script src="app.js"></script>
+<script src="explore.js"></script>
+</body>
+</html>
