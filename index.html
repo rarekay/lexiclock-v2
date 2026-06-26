@@ -13,6 +13,15 @@
   <link rel="manifest" href="manifest.json"/>
   <link rel="apple-touch-icon" href="icons/icon.svg"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <!-- Fix onboarding flash -->
+  <script>
+    if (localStorage.getItem('lc_onboarded')) {
+      document.documentElement.style.setProperty('--ob-display', 'none');
+    }
+    if (localStorage.getItem('lc_theme') === 'light') {
+      document.documentElement.classList.add('preload-light');
+    }
+  </script>
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-EHTTN7BPX0"></script>
   <script>
@@ -52,6 +61,73 @@
     <div class="ob-actions">
       <button class="ob-skip" id="ob-skip">Skip</button>
       <button class="ob-next" id="ob-next">Next</button>
+    </div>
+  </div>
+
+  <!-- ── Update Banner ── -->
+  <div class="update-banner" id="update-banner">
+    <div class="update-text">✨ LexiClock has been updated</div>
+    <button class="update-btn" onclick="applyUpdate()">Reload</button>
+    <button class="update-close" onclick="document.getElementById('update-banner').classList.remove('visible')" aria-label="Dismiss">×</button>
+  </div>
+
+  <!-- ── Install Prompt ── -->
+  <div class="install-prompt" id="install-prompt">
+    <div class="install-sheet">
+      <div class="install-handle"></div>
+      <div class="install-title">Add LexiClock to your home screen</div>
+      <div class="install-sub">Works offline after first load. No app store needed.</div>
+      <div class="install-tabs">
+        <button class="install-tab active" id="tab-ios" onclick="switchInstallTab('ios')">📱 iPhone</button>
+        <button class="install-tab" id="tab-android" onclick="switchInstallTab('android')">🤖 Android</button>
+      </div>
+      <div class="install-steps" id="steps-ios">
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Open in Safari</div>
+            <div class="install-step-desc">Must be <span class="hl">Safari</span> — Chrome and other browsers don't support installation on iPhone</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Tap the Share button</div>
+            <div class="install-step-desc">The <span class="hl">↗</span> icon at the bottom centre of Safari (box with an arrow pointing up)</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Tap "Add to Home Screen"</div>
+            <div class="install-step-desc">Scroll down in the share sheet, tap <span class="hl">Add to Home Screen</span>, then tap <span class="hl">Add</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="install-steps" id="steps-android" style="display:none">
+        <div class="install-step">
+          <div class="install-step-num">1</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Open in Chrome</div>
+            <div class="install-step-desc">Make sure you're using <span class="hl">Chrome</span> browser</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">2</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Tap the menu</div>
+            <div class="install-step-desc">Tap the <span class="hl">⋮ three dots</span> in the top right corner</div>
+          </div>
+        </div>
+        <div class="install-step">
+          <div class="install-step-num">3</div>
+          <div class="install-step-text">
+            <div class="install-step-title">Tap "Add to Home screen"</div>
+            <div class="install-step-desc">Tap <span class="hl">Add to Home screen</span> then <span class="hl">Add</span>. Chrome may also show an <span class="hl">Install</span> banner automatically.</div>
+          </div>
+        </div>
+      </div>
+      <button class="install-close" onclick="closeInstallPrompt()">Maybe later</button>
     </div>
   </div>
 
@@ -287,7 +363,7 @@
     <div class="explore-section" id="explore-anagram" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
       <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
       <div class="sec-label">Anagrammer</div>
-      <input type="text" id="anagram-input" class="word-input" placeholder="Enter letters e.g. AEINRST or use ? for blank" maxlength="7"/>
+      <input type="text" id="anagram-input" class="word-input" placeholder="Enter up to 15 letters, use ? for blank" maxlength="15"/>
       <div class="word-hint">Up to 7 letters. Use ? for a blank tile.</div>
       <button class="check-btn" id="anagram-run" onclick="runAnagram()">Find words</button>
       <div class="loading-dots" id="anagram-loading" style="display:none">
@@ -369,6 +445,24 @@
             <input type="checkbox" id="toggle-vibration" checked/>
             <div class="toggle-track"></div>
           </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">Light mode</div>
+            <div class="setting-sub">Switch between dark and light theme</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="toggle-theme"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>
+
+      <div class="sec-label">Install</div>
+      <div class="setting-group">
+        <div class="setting-link" onclick="showInstallPrompt()">
+          <div><div class="setting-link-label">Add to Home Screen</div><div class="setting-link-sub">Install LexiClock as an app on your device</div></div>
+          <i class="ti ti-download setting-link-arrow" aria-hidden="true"></i>
         </div>
       </div>
 

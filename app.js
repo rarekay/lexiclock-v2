@@ -1,5 +1,34 @@
 'use strict';
 
+// ── Install Prompt ────────────────────────────────────────────────────────────
+function showInstallPrompt() {
+  const isAndroid = /android/i.test(navigator.userAgent);
+  if (isAndroid) switchInstallTab('android');
+  document.getElementById('install-prompt').classList.add('visible');
+}
+function closeInstallPrompt() {
+  document.getElementById('install-prompt').classList.remove('visible');
+  localStorage.setItem('lc_install_dismissed', '1');
+}
+function switchInstallTab(tab) {
+  document.getElementById('tab-ios').classList.toggle('active', tab === 'ios');
+  document.getElementById('tab-android').classList.toggle('active', tab === 'android');
+  document.getElementById('steps-ios').style.display = tab === 'ios' ? 'flex' : 'none';
+  document.getElementById('steps-android').style.display = tab === 'android' ? 'flex' : 'none';
+}
+function checkInstallPrompt() {
+  const isInstalled = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+  const dismissed = localStorage.getItem('lc_install_dismissed');
+  const shown = localStorage.getItem('lc_install_shown');
+  if (!isInstalled && !dismissed && !shown) {
+    setTimeout(() => {
+      showInstallPrompt();
+      localStorage.setItem('lc_install_shown', '1');
+    }, 90000);
+  }
+}
+
 // ── Wake Lock ─────────────────────────────────────────────────────────────────
 let wakeLock = null;
 
@@ -547,9 +576,15 @@ function closeVerdict() {
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────────
+function applyTheme(light) {
+  document.body.classList.toggle('light', light);
+}
+
 function initSettings() {
   document.getElementById('toggle-sound').checked = state.settings.sound;
   document.getElementById('toggle-vibration').checked = state.settings.vibration;
+  document.getElementById('toggle-theme').checked = state.settings.lightMode || false;
+  applyTheme(state.settings.lightMode || false);
 
   document.getElementById('toggle-sound').addEventListener('change', e => {
     state.settings.sound = e.target.checked;
@@ -557,6 +592,11 @@ function initSettings() {
   });
   document.getElementById('toggle-vibration').addEventListener('change', e => {
     state.settings.vibration = e.target.checked;
+    saveSettings();
+  });
+  document.getElementById('toggle-theme').addEventListener('change', e => {
+    state.settings.lightMode = e.target.checked;
+    applyTheme(e.target.checked);
     saveSettings();
   });
 }
@@ -591,11 +631,40 @@ function dismissOnboarding() {
   document.getElementById('onboarding').classList.add('hidden');
 }
 
-// ── Service Worker ────────────────────────────────────────────────────────────
-function registerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+// ── Update Detection ──────────────────────────────────────────────────────────
+let newWorker = null;
+
+function applyUpdate() {
+  if (newWorker) {
+    newWorker.postMessage({ action: 'skipWaiting' });
+  } else {
+    window.location.reload();
   }
+}
+
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js').then(reg => {
+    const showBanner = (worker) => {
+      newWorker = worker;
+      document.getElementById('update-banner').classList.add('visible');
+    };
+    if (reg.waiting) showBanner(reg.waiting);
+    reg.addEventListener('updatefound', () => {
+      const installing = reg.installing;
+      installing.addEventListener('statechange', () => {
+        if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+          showBanner(installing);
+        }
+      });
+    });
+    // Poll every 60s to catch updates on long sessions
+    setInterval(() => reg.update(), 60000);
+  }).catch(() => {});
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    window.location.reload();
+  });
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -606,6 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initExplore();
   registerSW();
   updateTimerUI();
+  checkInstallPrompt();
 
   document.addEventListener('touchstart', () => { if (!audioCtx) getAudio(); }, { once: true });
   document.addEventListener('click', () => { if (!audioCtx) getAudio(); }, { once: true });

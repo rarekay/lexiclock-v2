@@ -5,8 +5,6 @@ const explore = {
   wordLists: null,
   wotd: null,
   wotdRevealed: false,
-  anagramResults: [],
-  patternResults: [],
   currentSection: 'home'
 };
 
@@ -36,8 +34,7 @@ function renderWotd() {
   if (!explore.wotd || !explore.wotd.length) return;
   const idx = getWotdIndex();
   const entry = explore.wotd[idx];
-  const dictName = state.settings.dict === 'csw' ? 'Collins CSW' : 'NWL2023';
-
+  const dictName = state.settings.dict === 'csw' ? 'Collins CSW24' : 'NWL2023';
   document.getElementById('wotd-word').textContent = entry.word;
   document.getElementById('wotd-pts').textContent = `${entry.pts} pts`;
   document.getElementById('wotd-letters').textContent = `${entry.letters} letters · ${dictName}`;
@@ -60,16 +57,13 @@ function showExploreSection(section) {
   document.querySelectorAll('.explore-section').forEach(s => s.style.display = 'none');
   document.getElementById(`explore-${section}`).style.display = 'flex';
   explore.currentSection = section;
-
   if (section === 'home') renderWotd();
   if (section === 'highvalue') renderHighValue();
   if (section === 'vowelheavy') renderVowelHeavy();
   if (section === 'tournament') renderTournament();
 }
 
-function exploreBack() {
-  showExploreSection('home');
-}
+function exploreBack() { showExploreSection('home'); }
 
 // ── Anagrammer ────────────────────────────────────────────────────────────────
 async function runAnagram() {
@@ -87,34 +81,61 @@ async function runAnagram() {
   const fixed = letters.filter(l => l !== '?');
   const results = new Set();
 
-  function permute(arr, current = '') {
-    if (current.length >= 2) {
-      if (explore.wordLists.has(current)) results.add(current);
+  // For large inputs use substring matching instead of full permutations
+  // Permutation approach works well up to 10 letters; beyond that use containment check
+  if (input.replace(/\?/g, '').length <= 10 && blanks === 0) {
+    // Full permutation for shorter inputs
+    function permute(arr, current = '') {
+      if (current.length >= 2 && explore.wordLists.has(current)) results.add(current);
+      if (current.length === arr.length) return;
+      const used = new Set();
+      for (let i = 0; i < arr.length; i++) {
+        if (used.has(arr[i])) continue;
+        used.add(arr[i]);
+        permute([...arr.slice(0,i), ...arr.slice(i+1)], current + arr[i]);
+      }
     }
-    if (current.length === arr.length) return;
-    const used = new Set();
-    for (let i = 0; i < arr.length; i++) {
-      if (used.has(arr[i])) continue;
-      used.add(arr[i]);
-      const rest = [...arr.slice(0,i), ...arr.slice(i+1)];
-      permute(rest, current + arr[i]);
+    permute(fixed);
+  } else {
+    // For longer inputs: find all words that can be formed from available letters
+    const letterCount = {};
+    fixed.forEach(l => { letterCount[l] = (letterCount[l] || 0) + 1; });
+
+    for (const word of explore.wordLists) {
+      if (word.length < 2 || word.length > input.length) continue;
+      const needed = {};
+      let needBlanks = 0;
+      let valid = true;
+
+      for (const ch of word) {
+        needed[ch] = (needed[ch] || 0) + 1;
+      }
+      for (const [ch, count] of Object.entries(needed)) {
+        const have = letterCount[ch] || 0;
+        if (have < count) {
+          needBlanks += count - have;
+        }
+      }
+      if (needBlanks <= blanks) results.add(word);
     }
   }
 
-  if (blanks === 0) {
-    permute(fixed);
-  } else if (blanks === 1) {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    alphabet.forEach(letter => {
-      permute([...fixed, letter]);
-    });
-  } else {
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    alphabet.forEach(l1 => {
-      alphabet.forEach(l2 => {
-        permute([...fixed, l1, l2]);
-      });
-    });
+  // Handle blanks for shorter inputs
+  if (blanks > 0 && fixed.length <= 9) {
+    results.clear();
+    const letterCount = {};
+    fixed.forEach(l => { letterCount[l] = (letterCount[l] || 0) + 1; });
+    for (const word of explore.wordLists) {
+      if (word.length < 2 || word.length > input.length) continue;
+      const needed = {};
+      let needBlanks = 0;
+      for (const ch of word) needed[ch] = (needed[ch] || 0) + 1;
+      for (const [ch, count] of Object.entries(needed)) {
+        const have = letterCount[ch] || 0;
+        if (have < count) needBlanks += count - have;
+      }
+      if (needBlanks <= blanks) results.add(word);
+    }
   }
 
   // Group by length
@@ -185,6 +206,7 @@ function wordScore(word) { return word.split('').reduce((s,l) => s + (letterValu
 async function renderHighValue() {
   await loadExploreData();
   const words = [...explore.wordLists];
+  document.getElementById('hv-loading').style.display = 'none';
 
   const sections = {
     'Q without U': words.filter(w => w.includes('Q') && !w.includes('U') && w.length <= 8).sort((a,b) => a.length - b.length),
@@ -213,6 +235,7 @@ function countVowels(word) { return word.split('').filter(l => 'AEIOU'.includes(
 async function renderVowelHeavy() {
   await loadExploreData();
   const words = [...explore.wordLists];
+  document.getElementById('vh-loading').style.display = 'none';
 
   const sections = {
     '5+ vowels': words.filter(w => countVowels(w) >= 5 && w.length <= 10).sort((a,b) => a.length - b.length).slice(0,80),
@@ -236,18 +259,19 @@ async function renderVowelHeavy() {
 async function renderTournament() {
   await loadExploreData();
   const words = [...explore.wordLists];
+  document.getElementById('t-loading').style.display = 'none';
 
   const twoLetters = words.filter(w => w.length === 2).sort();
-  const threeLetterQ = words.filter(w => w.length === 3 && (w.includes('Q') || w.includes('Z') || w.includes('X') || w.includes('J'))).sort();
-  const shortQ = words.filter(w => w.includes('Q') && !w.includes('U') && w.length <= 6).sort((a,b) => a.length - b.length);
+  const threeLetterPower = words.filter(w => w.length === 3 && (w.includes('Q') || w.includes('Z') || w.includes('X') || w.includes('J'))).sort();
+  const shortQnoU = words.filter(w => w.includes('Q') && !w.includes('U') && w.length <= 6).sort((a,b) => a.length - b.length);
 
   const container = document.getElementById('tournament-content');
   let html = '';
 
   const sections = [
-    { title: 'All 2-letter words', desc: 'Every valid 2-letter word — essential knowledge', list: twoLetters },
-    { title: 'Q without U words', desc: 'Play your Q without needing a U', list: shortQ },
-    { title: '3-letter power tile words', desc: 'Q, Z, X, J in 3-letter combinations', list: threeLetterQ },
+    { title: 'All 2-letter words', desc: 'Every valid 2-letter word — essential knowledge for any player', list: twoLetters },
+    { title: 'Q without U words', desc: 'Play your Q without needing a U', list: shortQnoU },
+    { title: '3-letter power tile words', desc: 'Q, Z, X, J in 3-letter combinations', list: threeLetterPower },
   ];
 
   sections.forEach(({title, desc, list}) => {
@@ -262,9 +286,7 @@ async function renderTournament() {
 
 // ── Init Explore ──────────────────────────────────────────────────────────────
 function initExplore() {
-  loadExploreData().then(() => {
-    renderWotd();
-  });
+  loadExploreData().then(() => renderWotd());
 
   document.getElementById('anagram-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') runAnagram();

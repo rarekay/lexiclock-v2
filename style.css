@@ -632,7 +632,7 @@ html, body {
   inset: 0;
   background: var(--bg);
   z-index: 100;
-  display: flex;
+  display: var(--ob-display, flex);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -1019,3 +1019,190 @@ html, body {
   color: var(--muted);
   margin-bottom: 10px;
 }
+
+/* ── Install prompt ── */
+.install-prompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0;
+}
+.install-prompt.visible { display: flex; }
+.install-sheet {
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 40px;
+  width: 100%;
+  max-width: 430px;
+}
+.install-handle {
+  width: 48px; height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  margin: 0 auto 24px;
+}
+.install-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 6px;
+  text-align: center;
+}
+.install-sub {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.install-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 24px; }
+.install-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.install-step:last-child { border-bottom: none; }
+.install-step-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--amber);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.install-step-text { flex: 1; }
+.install-step-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+  margin-bottom: 3px;
+}
+.install-step-desc {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.install-step-desc .hl { color: var(--amber); font-weight: 500; }
+.install-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.install-tab {
+  flex: 1;
+  padding: 10px;
+  background: var(--surface2);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.install-tab.active {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.install-close {
+  width: 100%;
+  padding: 13px;
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: 14px;
+  font-family: var(--font-ui);
+  cursor: pointer;
+}
+
+/* ── Update banner ── */
+.update-banner {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  background: #2E2E45;
+  border: 1px solid var(--amber);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  z-index: 300;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+.update-banner.visible { display: flex; }
+.update-text {
+  flex: 1;
+  font-size: 13px;
+  color: var(--cream);
+}
+.update-btn {
+  background: var(--amber);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  color: var(--bg);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.update-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+/* ── Light mode ── */
+body.light {
+  --bg: #F5F4F0;
+  --surface: #FFFFFF;
+  --surface2: #EBEBEB;
+  --cream: #1C1C2E;
+  --muted: #6B6B8A;
+  --border: #D8D8E8;
+  --green-bg: #D4F7E0;
+  --red-bg: #FAD9D9;
+  --purple-bg: #EDE0FA;
+  --purple-border: #7C3AED44;
+}
+body.light .lc-nav { background: #EBEBEB; border-top-color: #D8D8E8; }
+body.light .player-tile { background: #FFFFFF; }
+body.light .player-tile.active { background: #F5A623; }
+body.light .player-tile.inactive { opacity: 0.4; }
+body.light .player-tile.warning { background: #FAD9D9; }
+body.light .player-tile.negative { background: #FAD9D9; }
+body.light .player-tile.waiting { background: #FFF3DC; }
+body.light .modal { background: #FFFFFF; }
+body.light .modal-btn.secondary { background: #EBEBEB; }
+body.light .onboarding { background: #F5F4F0; }
+body.light .install-sheet { background: #FFFFFF; }
+body.light .update-banner { background: #FFFFFF; }
+body.light .wotd-card { background: #FFFFFF; }
+body.light .explore-card { background: #FFFFFF; }
+body.light .anagram-word { background: #FFFFFF; border-color: #D8D8E8; }
+body.light .setting-group { background: #FFFFFF; }
+body.light .verdict-screen.valid { background: #D4F7E0; }
+body.light .verdict-screen.invalid { background: #FAD9D9; }
+body.light input { background: #FFFFFF; color: #1C1C2E; border-color: #D8D8E8; }
+body.light .mode-card { background: #FFFFFF; }
