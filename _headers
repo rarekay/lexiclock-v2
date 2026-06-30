@@ -1,0 +1,34 @@
+# Never cache critical files
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/app.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/explore.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/train.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+
+# Cache assets aggressively
+/words/*
+  Cache-Control: public, max-age=31536000
+
+/icons/*
+  Cache-Control: public, max-age=31536000
+
+/*.css
+  Cache-Control: public, max-age=86400
