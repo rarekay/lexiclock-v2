@@ -1,17 +1,5 @@
-# Never cache critical files
+# Never cache entry points
 /sw.js
-  Cache-Control: no-cache, no-store, must-revalidate
-  Pragma: no-cache
-
-/app.js
-  Cache-Control: no-cache, no-store, must-revalidate
-  Pragma: no-cache
-
-/explore.js
-  Cache-Control: no-cache, no-store, must-revalidate
-  Pragma: no-cache
-
-/train.js
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
 
@@ -23,7 +11,17 @@
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache
 
-# Cache assets aggressively
+# Versioned JS files — cache forever, new version = new filename
+/app.v2.0.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/explore.v2.0.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/train.v2.0.js
+  Cache-Control: public, max-age=31536000, immutable
+
+# Other assets
 /words/*
   Cache-Control: public, max-age=31536000
 
