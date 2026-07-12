@@ -15,7 +15,7 @@
 /app.v2.0.js
   Cache-Control: public, max-age=31536000, immutable
 
-/explore.v2.0.js
+/explore.v2.1.js
   Cache-Control: public, max-age=31536000, immutable
 
 /train.v2.0.js
