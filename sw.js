@@ -1,7 +1,7 @@
-const CACHE = 'lexiclock-v10';
+const CACHE = 'lexiclock-v11';
 const ASSETS = [
   '/','/index.html','/style.css',
-  '/app.v2.0.js','/explore.v2.0.js','/train.v2.0.js',
+  '/app.v2.0.js','/explore.v2.1.js','/train.v2.0.js',
   '/manifest.json','/icons/icon.svg',
   '/words/csw.txt','/words/nwl2023.txt','/words/wotd.json','/words/invalid_words.json'
 ];
