@@ -363,7 +363,10 @@
     <div class="explore-section" id="explore-anagram" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
       <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
       <div class="sec-label">Anagrammer</div>
-      <input type="text" id="anagram-input" class="word-input" placeholder="Enter up to 15 letters, use ? for blank" maxlength="15"/>
+      <div class="input-with-clear">
+  <input type="text" id="anagram-input" class="word-input" placeholder="Enter up to 15 letters, use ? for blank" maxlength="15"/>
+  <button class="input-clear-btn" id="anagram-clear" onclick="clearAnagramInput()" style="display:none">✕</button>
+</div>
       <div class="word-hint">Up to 7 letters. Use ? for a blank tile.</div>
       <button class="check-btn" id="anagram-run" onclick="runAnagram()">Find words</button>
       <div class="loading-dots" id="anagram-loading" style="display:none">
@@ -376,7 +379,10 @@
     <div class="explore-section" id="explore-pattern" style="display:none; flex-direction:column; flex:1; overflow-y:auto; padding: 0 20px;">
       <button class="explore-back" onclick="exploreBack()"><i class="ti ti-arrow-left"></i> Back</button>
       <div class="sec-label">Pattern search</div>
-      <input type="text" id="pattern-input" class="word-input" placeholder="e.g. ??ING or QU?? or Z???" maxlength="15"/>
+        <div class="input-with-clear">
+          <input type="text" id="pattern-input" class="word-input" placeholder="e.g. ??ING or QU?? or Z???" maxlength="15"/>
+          <button class="input-clear-btn" id="pattern-clear" onclick="clearPatternInput()" style="display:none">✕</button>
+    </div>
       <div class="word-hint">Use ? as a wildcard for any letter.</div>
       <button class="check-btn" id="pattern-run" onclick="runPattern()">Search</button>
       <div class="loading-dots" id="pattern-loading" style="display:none">
@@ -532,7 +538,7 @@
   </nav>
 
 </div>
-<script src="app.v2.0.js"></script>
+<script src="app.v2.1.js"></script>
 <script src="explore.v2.0.js"></script>
 </body>
 </html>
