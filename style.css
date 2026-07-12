@@ -1206,3 +1206,32 @@ body.light .verdict-screen.valid { background: #D4F7E0; }
 body.light .verdict-screen.invalid { background: #FAD9D9; }
 body.light input { background: #FFFFFF; color: #1C1C2E; border-color: #D8D8E8; }
 body.light .mode-card { background: #FFFFFF; }
+
+/* ── Input with clear button ── */
+.input-with-clear {
+  position: relative;
+  width: 100%;
+}
+.input-with-clear .word-input {
+  padding-right: 44px;
+  width: 100%;
+}
+.input-clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.input-clear-btn:hover { background: var(--surface2); color: var(--cream); }
