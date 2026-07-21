@@ -1,4 +1,4 @@
-const CACHE = 'lexiclock-v13';
+const CACHE = 'lexiclock-v14';
 const ASSETS = [
   '/','/index.html','/style.css',
   '/app.v2.0.js','/explore.v2.1.js','/train.v2.0.js',
