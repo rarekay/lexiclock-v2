@@ -1,0 +1,6 @@
+
+/* ── Blank letter highlighting in anagram results ── */
+.blank-used {
+  color: #F5A623;
+  font-weight: 700;
+}
