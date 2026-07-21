@@ -122,10 +122,17 @@ async function runAnagram() {
   const container = document.getElementById('anagram-results');
   const lengths = Object.keys(grouped).map(Number).sort((a,b) => b-a);
 
+  // Build visual representation of entered tiles — blanks in amber
+  const tileDisplay = input.split('').map(l =>
+    l === '?' 
+      ? `<span class="input-tile blank-tile">?</span>`
+      : `<span class="input-tile">${l}</span>`
+  ).join('');
+
   if (lengths.length === 0) {
-    container.innerHTML = '<div class="explore-empty">No valid words found from those letters.</div>';
+    container.innerHTML = `<div class="anagram-tiles">${tileDisplay}</div><div class="explore-empty">No valid words found from those letters.</div>`;
   } else {
-    let html = `<div class="anagram-count">${results.size} word${results.size !== 1 ? 's' : ''} found</div>`;
+    let html = `<div class="anagram-tiles">${tileDisplay}</div><div class="anagram-count">${results.size} word${results.size !== 1 ? 's' : ''} found</div>`;
     lengths.forEach(len => {
       const words = grouped[len].sort();
       html += `<div class="anagram-group">`;
