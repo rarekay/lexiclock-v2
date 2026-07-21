@@ -137,7 +137,7 @@ async function runAnagram() {
           highlighted += ch;
         } else {
           // Amber inline — no extra element, just a styled character
-          highlighted += `<b style="color:#F5A623">${ch}</b>`;
+          highlighted += `<span style="color:#F5A623;font-size:inherit">${ch}</span>`;
         }
       }
       return `<span class="anagram-word">${highlighted}</span>`;
