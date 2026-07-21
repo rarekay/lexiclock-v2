@@ -1234,28 +1234,9 @@ body.light .mode-card { background: #FFFFFF; }
   border-radius: 50%;
   transition: background 0.15s;
 }
-.anagram-tiles {
+.blank-used {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-.input-tile {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px; height: 36px;
-  background: #2E2E45;
-  border-radius: 8px;
-  font-family: var(--font-mono);
-  font-size: 18px;
-  font-weight: 500;
-  color: #C084FC;
-  border: 1.5px solid #3A3A55;
-}
-.input-tile.blank-tile {
   color: #F5A623;
-  border-color: #F5A62366;
-  background: #2B1D00;
+  font-weight: 700;=
 }
 .input-clear-btn:hover { background: var(--surface2); color: var(--cream); }
