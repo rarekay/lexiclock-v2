@@ -122,23 +122,33 @@ async function runAnagram() {
   const container = document.getElementById('anagram-results');
   const lengths = Object.keys(grouped).map(Number).sort((a,b) => b-a);
 
-  // Build visual representation of entered tiles — blanks in amber
-  const tileDisplay = input.split('').map(l =>
-    l === '?' 
-      ? `<span class="input-tile blank-tile">?</span>`
-      : `<span class="input-tile">${l}</span>`
-  ).join('');
-
   if (lengths.length === 0) {
-    container.innerHTML = `<div class="anagram-tiles">${tileDisplay}</div><div class="explore-empty">No valid words found from those letters.</div>`;
+    container.innerHTML = '<div class="explore-empty">No valid words found from those letters.</div>';
   } else {
-    let html = `<div class="anagram-tiles">${tileDisplay}</div><div class="anagram-count">${results.size} word${results.size !== 1 ? 's' : ''} found</div>`;
+    // Function to highlight letters covered by blanks
+    function highlightBlanks(word, fixedLetters, numBlanks) {
+      if (numBlanks === 0) return `<span class="anagram-word">${word}</span>`;
+      const avail = {};
+      fixedLetters.forEach(l => { avail[l] = (avail[l] || 0) + 1; });
+      let highlighted = '';
+      for (const ch of word) {
+        if (avail[ch] && avail[ch] > 0) {
+          avail[ch]--;
+          highlighted += ch;
+        } else {
+          highlighted += `<span class="blank-used">${ch}</span>`;
+        }
+      }
+      return `<span class="anagram-word">${highlighted}</span>`;
+    }
+
+    let html = `<div class="anagram-count">${results.size} word${results.size !== 1 ? 's' : ''} found</div>`;
     lengths.forEach(len => {
       const words = grouped[len].sort();
       html += `<div class="anagram-group">`;
       html += `<div class="anagram-group-label">${len} letters (${words.length})</div>`;
       html += `<div class="anagram-words">${words.map(w =>
-        `<span class="anagram-word">${w}</span>`).join('')}</div>`;
+        highlightBlanks(w, fixed, blanks)).join('')}</div>`;
       html += `</div>`;
     });
     container.innerHTML = html;
