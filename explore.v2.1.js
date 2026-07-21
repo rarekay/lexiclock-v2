@@ -136,7 +136,8 @@ async function runAnagram() {
           avail[ch]--;
           highlighted += ch;
         } else {
-          highlighted += `<span class="blank-used">${ch}</span>`;
+          // Amber inline — no extra element, just a styled character
+          highlighted += `<b style="color:#F5A623">${ch}</b>`;
         }
       }
       return `<span class="anagram-word">${highlighted}</span>`;
