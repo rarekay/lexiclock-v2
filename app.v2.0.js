@@ -724,7 +724,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initSettings();
   initOnboarding();
   initExplore();
-  initTrain();
   registerSW();
   updateTimerUI();
   checkInstallPrompt();
