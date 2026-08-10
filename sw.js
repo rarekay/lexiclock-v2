@@ -1,4 +1,4 @@
-const CACHE = 'lexiclock-v16';
+const CACHE = 'lexiclock-v17';
 const ASSETS = [
   '/','/index.html','/style.css',
   '/app.v2.0.js','/explore.v2.1.js','/train.v2.0.js',
@@ -34,29 +34,39 @@ self.addEventListener('fetch', e => {
     url.pathname === '/' || url.pathname.endsWith('.html');
 
   if (isHTML) {
-    // Network first for HTML — always try to get fresh HTML
+    // Network-first for HTML — always try fresh online.
+    // When offline, don't rely on an exact URL match (iOS can launch an
+    // installed PWA with a slightly different URL than what got cached).
+    // Fall back to the cached index.html specifically, ignoring the
+    // exact request URL and query string.
     e.respondWith(
       fetch(e.request)
         .then(res => {
           const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put('/index.html', clone));
           return res;
         })
-        .catch(() => caches.match(e.request))
+        .catch(() =>
+          caches.match('/index.html', { ignoreSearch: true })
+            .then(cached => cached || caches.match('/', { ignoreSearch: true }))
+        )
     );
-  } else {
-    // Cache first for everything else
-    e.respondWith(
-      caches.match(e.request).then(cached => cached || fetch(e.request))
-    );
+    return;
   }
-});
 
-// Only skip waiting when user explicitly taps Reload in the banner
-self.addEventListener('message', e => {
-  if (e.data?.action === 'skipWaiting') {
-    self.skipWaiting();
-    // After skipWaiting, claim all clients so they get the update
-    self.clients.claim();
-  }
+  // Cache-first for everything else, including cross-origin resources
+  // like the icon font CDN. Anything fetched successfully while online
+  // gets cached automatically, so it's available offline afterward.
+  e.respondWith(
+    caches.match(e.request, { ignoreSearch: true }).then(cached => {
+      if (cached) return cached;
+      return fetch(e.request).then(res => {
+        if (res && (res.status === 200 || res.type === 'opaque')) {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      }).catch(() => cached);
+    })
+  );
 });
