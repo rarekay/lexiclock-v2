@@ -4,15 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="LexiClock"/>
   <meta name="theme-color" content="#1C1C2E"/>
   <meta name="description" content="Scrabble timer and word challenger for all players. Free, offline, installable on any device."/>
   <title>LexiClock</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.v2.1.0.css"/>
   <link rel="manifest" href="manifest.json"/>
-  <link rel="apple-touch-icon" href="icons/icon.svg"/>
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css"/>
   <!-- Fix onboarding flash -->
   <script>
@@ -82,6 +84,7 @@
   <div class="install-prompt" id="install-prompt">
     <div class="install-sheet">
       <div class="install-handle"></div>
+      <button class="install-x" onclick="closeInstallPrompt()" aria-label="Close">✕</button>
       <div class="install-title">Add LexiClock to your home screen</div>
       <div class="install-sub">Works offline after first load. No app store needed.</div>
       <div class="install-tabs">
@@ -134,8 +137,14 @@
           </div>
         </div>
       </div>
-      <button class="install-close" onclick="closeInstallPrompt()">Maybe later</button>
+      <button class="install-close" onclick="closeInstallPrompt()"><span id="install-close-label">Maybe later</span></button>
     </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast" role="status">
+    <div class="toast-text" id="toast-text"></div>
+    <button class="toast-close" onclick="hideToast()" aria-label="Dismiss">×</button>
   </div>
 
   <!-- ── Reset Modal ── -->
@@ -198,17 +207,21 @@
       <div class="custom-time-wrap" id="custom-time-wrap">
         <div class="custom-time-field">
           <label>Player 1 custom time</label>
-          <input type="text" id="custom-p1" placeholder="e.g. 18:00" autocomplete="off"/>
+          <input type="text" id="custom-p1" placeholder="e.g. 18 or 18:30" inputmode="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
         </div>
         <div class="custom-time-field">
           <label>Player 2 custom time</label>
-          <input type="text" id="custom-p2" placeholder="e.g. 18:00" autocomplete="off"/>
+          <input type="text" id="custom-p2" placeholder="e.g. 18 or 18:30" inputmode="text" maxlength="6" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"/>
         </div>
       </div>
 
       <button class="start-btn" onclick="startGame()">
         <i class="ti ti-player-play" aria-hidden="true"></i> Start game
       </button>
+
+      <div class="awake-tip" id="awake-tip">
+        <strong>Screen may lock during games.</strong> This iPhone can't keep the screen on in the installed app (it needs iOS 18.4 or newer). Open lexiclock.app in Safari instead, or set Settings &rarr; Display &amp; Brightness &rarr; Auto-Lock to Never.
+      </div>
 
       <div class="donation-nudge" id="donation-nudge">
         <div class="nudge-text"><span>Enjoying LexiClock?</span></div>
@@ -501,7 +514,7 @@
       <div class="setting-group">
         <div class="setting-row">
           <div class="setting-label">LexiClock</div>
-          <div class="setting-sub" style="color: var(--muted);">v1.0.4</div>
+          <div class="setting-sub" style="color: var(--muted);">v2.1.0</div>
         </div>
         <div class="setting-row">
           <div>
@@ -545,7 +558,7 @@
   </nav>
 
 </div>
-<script src="app.v2.1.js"></script>
+<script src="app.v2.1.0.js"></script>
 <script src="explore.v2.3.js"></script>
 </body>
 </html>

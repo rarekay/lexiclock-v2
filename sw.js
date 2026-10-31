@@ -1,27 +1,32 @@
-const CACHE = 'lexiclock-v20';
+const CACHE = 'lexiclock-v21';
 
+// Everything the app needs to run offline. Each file is cached on its own, so one
+// wrong filename can't stop the others from being saved.
 const CORE = [
-  '/', '/index.html', '/style.css',
-  '/app.v2.0.js', '/explore.v2.3.js',
-  '/manifest.json', '/icons/icon.svg',
+  '/', '/index.html', '/style.v2.1.0.css',
+  '/app.v2.1.0.js', '/explore.v2.3.js',
+  '/manifest.json',
+  '/icons/icon.svg', '/icons/icon-192.png', '/icons/apple-touch-icon.png', '/icons/favicon-32.png',
   '/words/csw.txt', '/words/nwl2023.txt', '/words/wotd.json'
 ];
 
+// The icon font (pinned version, matches index.html)
 const ICONS = 'https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/';
 const EXTRA = [
   ICONS + 'tabler-icons.min.css',
   ICONS + 'fonts/tabler-icons.woff2?v3.49.0'
 ];
 
-// Cache each file separately so one bad filename can't block the rest
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache =>
-      Promise.allSettled([...CORE, ...EXTRA].map(url =>
-        fetch(url, { cache: 'reload' }).then(res => {
-          if (!res.ok) throw new Error(url + ' ' + res.status);
-          return cache.put(url, res);
-        })
+      Promise.all([...CORE, ...EXTRA].map(url =>
+        fetch(url, { cache: 'reload' })
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return cache.put(url, res);
+          })
+          .catch(err => console.warn('[sw] could not cache', url, err.message || err))
       ))
     )
   );
